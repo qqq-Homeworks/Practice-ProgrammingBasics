@@ -8,20 +8,22 @@
 
 bool operator<(const TramRoute &route1, const TramRoute &route2);
 
-void SeedData(multiset<TramRoute> &);
+void SeedData(std::set<TramRoute> &);
 
-void FillDataFromFile(multiset<TramRoute> &, ifstream &);
+void FillDataFromFile(std::set<TramRoute> &, ifstream &);
 
 void PrintMenu();
 
-void Menu(multiset<TramRoute> &);
+void Menu(std::set<TramRoute> &);
 
-void ShowRoutesList(const multiset<TramRoute> &);
+void ShowRoutesList(const std::set<TramRoute> &);
 
-void InsertRoute(multiset<TramRoute> &);
+void InsertRoute(std::set<TramRoute> &);
 
-void EraseRoute(multiset<TramRoute> &);
+void EraseRoute(std::set<TramRoute> &);
 
-void GetRoute(const multiset<TramRoute> &);
+void GetRoute(const std::set<TramRoute> &);
+
+void SaveRoutes(const std::set<TramRoute>&);
 
 #endif //CODE_FUNCTIONS_H

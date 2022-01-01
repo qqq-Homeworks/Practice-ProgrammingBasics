@@ -2,58 +2,22 @@
 
 #include "functions.h"
 
-//template<typename charT, typename traits = std::char_traits<charT> >
-//class center_helper {
-//    std::basic_string<charT, traits> str_;
-//public:
-//    center_helper(std::basic_string<charT, traits> str) : str_(str) {}
-//
-//    template<typename a, typename b>
-//    friend std::basic_ostream<a, b> &operator<<(std::basic_ostream<a, b> &s, const center_helper<a, b> &c);
-//};
-//
-//template<typename charT, typename traits = std::char_traits<charT> >
-//center_helper<charT, traits> centered(std::basic_string<charT, traits> str) {
-//    return center_helper<charT, traits>(str);
-//}
-//
-//// redeclare for std::string directly so we can support anything that implicitly converts to std::string
-//center_helper<std::string::value_type, std::string::traits_type> centered(const std::string &str) {
-//    return center_helper<std::string::value_type, std::string::traits_type>(str);
-//}
-//
-//template<typename charT, typename traits>
-//std::basic_ostream<charT, traits> &
-//operator<<(std::basic_ostream<charT, traits> &s, const center_helper<charT, traits> &c) {
-//    std::streamsize w = s.width();
-//    if (w > c.str_.length()) {
-//        std::streamsize left = (w + c.str_.length()) / 2;
-//        s.width(left);
-//        s << c.str_;
-//        s.width(w - left);
-//        s << "";
-//    } else {
-//        s << c.str_;
-//    }
-//    return s;
-//}
-
 bool operator<(const TramRoute &route1, const TramRoute &route2) {
     return route1.Number < route2.Number;
 }
 
-void SeedData(multiset<TramRoute> &arrayToFill) {
-    const TramRoute defaultRoutes[] = {{"12А",  13.2, 184},
+void SeedData(std::set <TramRoute> &arrayToFill) {
+    const TramRoute defaultRoutes[] = {{"17A",  13.2, 184},
                                        {"47",   8,    140},
                                        {"11",   11.8, 165},
                                        {"167",  3.8,  38},
                                        {"15",   27.1, 273},
-                                       {"174к", 19.2, 204},
+                                       {"174K", 19.2, 204},
                                        {"812",  10.6, 120},
-                                       {"83А",  10.1, 117},
-                                       {"12А",  17,   189},
-                                       {"74к",  9,    98},
-                                       {"87А",  1.2,  12},
+                                       {"83A",  10.1, 117},
+                                       {"12A",  17,   189},
+                                       {"74K",  9,    98},
+                                       {"87A",  1.2,  12},
                                        {"87",   13,   132},
                                        {"1",    14.5, 154},
     };
@@ -65,7 +29,7 @@ void SeedData(multiset<TramRoute> &arrayToFill) {
     ofFile.close();
 }
 
-void FillDataFromFile(multiset<TramRoute> &routes, ifstream &file) {
+void FillDataFromFile(std::set <TramRoute> &routes, ifstream &file) {
     TramRoute tempRoute;
     while (!file.eof()) {
         file.read((char *) &tempRoute, sizeof(TramRoute));
@@ -81,13 +45,14 @@ void PrintMenu() {
                            "Узнать информацию по номеру маршрута",
                            "Сохранить список в файл",
                            "Закрыть программу"};
+    cout << '\n';
     for (size_t i = 0; i < 6; ++i) {
         cout << i + 1 << ". " << menu[i] << '\n';
     }
     cout << "Введите необходимый вам пункт меню:\n";
 }
 
-void Menu(multiset<TramRoute> &routes) {
+void Menu(std::set <TramRoute> &routes) {
     unsigned menuPoint;
     while (true) {
         PrintMenu();
@@ -106,7 +71,7 @@ void Menu(multiset<TramRoute> &routes) {
                 GetRoute(routes);
                 break;
             case SaveToFile:
-
+                SaveRoutes(routes);
                 break;
             case Exit:
                 return;
@@ -116,26 +81,32 @@ void Menu(multiset<TramRoute> &routes) {
     }
 }
 
-void ShowRoutesList(const multiset<TramRoute> &routes) {
-    // TODO: оформление таблички
-    cout << '|' << std::right << std::setw(strlen("Номер маршрута") + 2) << "Номер маршрута" << std::setw(3) << '|'
-         << std::right << std::setw(strlen("Протяжённость") + 2) << "Протяжённость" << std::setw(3) << '|'
-         << std::right << std::setw(strlen("Время в пути") + 2) << "Время в пути" << std::setw(3) << '|'
-         << '\n';
-    // cout << "|" << std::setw(23) << centered("Номер маршрута") << '|'
-    //         << std::right << std::setw(static_cast<int>(round(strlen("Протяжённость") * 1.5)))
-    //         << "Протяжённость" << std::right
-    //         << std::setw(static_cast<int>(round(strlen("Время в пути") * 1.5))) <<
-    //         "Время в пути" << "\n\n";
+void ShowRoutesList(const std::set <TramRoute> &routes) {
+    // TODO: оформление таблички(если не впадлу сделать уголки и попытаться убрать отступы)
+    cout << ' ';
+    for (size_t i = 0; i < 54; ++i) {
+        cout << "_";
+    }
+    cout << '\n';
+// РУССКИЕ символы не учитываются в string.length  !!??
+    cout << std::left << std::setw(3) << '|' << "Номер маршрута" << std::setw(3) << std::right << '|'
+         << std::setw(strlen("Протяжённость") + 3) << "Протяжённость" << std::setw(3) << '|' << std::setw(
+            strlen("Время в пути") + 2) << "Время в пути" << std::setw(3) << '|' << '\n';
+    cout << ' ';
+    for (size_t i = 0; i < 54; ++i) {
+        cout << "‾";
+    }
+    cout << '\n';
     for (const auto &route: routes) {
-        cout << std::setw(10) << route.Number
-             << std::setw(16) << route.Length << " км.";
+        cout << '|' << std::setw(7) << ' ' << std::left << route.Number
+             << std::right << std::setw(12 - route.Number.length()) << '|' << std::left << std::setw(5) << ' ' <<
+             std::setw(5) << route.Length << " км." << std::right << std::setw(5) << '|';
         if (route.RoadTime / 60 < 10) {
             cout << std::right
-                 << std::setw(strlen("Время в пути") / 2) << '0' << route.RoadTime / 60;
+                 << std::setw(7) << '0' << route.RoadTime / 60;
         } else {
             cout << std::right
-                 << std::setw(strlen("Время в пути") / 2) << route.RoadTime / 60;
+                 << std::setw(7) << route.RoadTime / 60;
         }
         cout << ':';
         if (route.RoadTime % 60 < 10) {
@@ -143,22 +114,19 @@ void ShowRoutesList(const multiset<TramRoute> &routes) {
         } else {
             cout << route.RoadTime % 60;
         }
-        cout << '\n';
+        cout <<std::setw(6) << '|';
+             cout << '\n';
+    }
+    cout << ' ';
+    for (size_t i = 0; i < 54; ++i) {
+        cout << "‾";
     }
 }
 
-void InsertRoute(multiset<TramRoute> &routes) {
+void InsertRoute(std::set <TramRoute> &routes) {
     TramRoute tempRoute;
     cout << "Введите номер маршрута для добавления:" << std::endl;
     cin >> tempRoute.Number;
-    //tempRoute.Number.erase(std::remove_if(tempRoute.Number.begin(), tempRoute.Number.end(), ::isspace),
-    //   tempRoute.Number.end());
-//    while (tempRoute.Number.empty()) {
-//        cout << "Строка номера не может быть пустой, повторите ввод согласно правилам:" << '\n';
-//        cin >> tempRoute.Number;
-//        tempRoute.Number.erase(std::remove_if(tempRoute.Number.begin(), tempRoute.Number.end(), ::isspace),
-//                               tempRoute.Number.end());
-//    }
     cout << "Введите длину маршрута в километрах, если число не целое, введте дробную часть через точку:" << '\n';
     bool aux = true;
     cin.exceptions(std::istream::failbit);
@@ -217,15 +185,10 @@ void InsertRoute(multiset<TramRoute> &routes) {
     }
     cout << '\n';
     cout << '\n';
-//    cin >> tempRoute.Length;
-//    while (!cin) {
-//        cout << "Введённое вами значение не является числом, повторите ввод согласно правилам:" << '\n';
-////        cin >> tempRoute.Length;
-//    }
 }
 
 //TODO: подумать над выходом
-void EraseRoute(multiset<TramRoute> &routes) {
+void EraseRoute(std::set <TramRoute> &routes) {
     string numberToDelete;
     cout << "Введите номер маршрута для удаления:" << '\n';
     cin >> numberToDelete;
@@ -260,7 +223,7 @@ void EraseRoute(multiset<TramRoute> &routes) {
     routes.erase(c);
 }
 
-void GetRoute(const multiset<TramRoute> &routes){
+void GetRoute(const std::set <TramRoute> &routes) {
     string numberToFind;
     cout << "Введите номер маршрута по которому хотите получить информацию:" << '\n';
     cin >> numberToFind;
@@ -292,4 +255,13 @@ void GetRoute(const multiset<TramRoute> &routes){
         cout << (*c).RoadTime % 60;
     }
     cout << '\n';
+}
+
+void SaveRoutes(const std::set <TramRoute> &routes) {
+    ofstream ofFile(FILE_NAME);
+    ofFile.clear();
+    for (const auto &route: routes) {
+        ofFile.write((char *) &route, sizeof(TramRoute));
+    }
+    ofFile.close();
 }
