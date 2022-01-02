@@ -20,6 +20,8 @@ void ShowRoutesList(const std::set<TramRoute> &);
 
 void InsertRoute(std::set<TramRoute> &);
 
+void EditRouteByName(std::set<TramRoute> &);
+
 void EraseRoute(std::set<TramRoute> &);
 
 void GetRoute(const std::set<TramRoute> &);

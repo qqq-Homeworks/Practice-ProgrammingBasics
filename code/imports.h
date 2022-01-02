@@ -25,6 +25,7 @@ struct TramRoute{
 enum MenuItem {
     ShowRoutes = 1,
     AddRoute,
+    EditRoute,
     DeleteRoute,
     GetInfo,
     SaveToFile,
