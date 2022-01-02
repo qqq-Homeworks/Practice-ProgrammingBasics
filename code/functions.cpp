@@ -6,7 +6,7 @@ bool operator<(const TramRoute &route1, const TramRoute &route2) {
     return route1.Number < route2.Number;
 }
 
-void SeedData(std::set <TramRoute> &arrayToFill) {
+void SeedData(std::set<TramRoute> &arrayToFill) {
     const TramRoute defaultRoutes[] = {{"17A",  13.2, 184},
                                        {"47",   8,    140},
                                        {"11",   11.8, 165},
@@ -29,7 +29,7 @@ void SeedData(std::set <TramRoute> &arrayToFill) {
     ofFile.close();
 }
 
-void FillDataFromFile(std::set <TramRoute> &routes, ifstream &file) {
+void FillDataFromFile(std::set<TramRoute> &routes, ifstream &file) {
     TramRoute tempRoute;
     while (!file.eof()) {
         file.read((char *) &tempRoute, sizeof(TramRoute));
@@ -39,20 +39,21 @@ void FillDataFromFile(std::set <TramRoute> &routes, ifstream &file) {
 }
 
 void PrintMenu() {
-    const char *menu[6] = {"Показать список трамвайных маршрутов",
+    const char *menu[7] = {"Показать список трамвайных маршрутов",
                            "Добавить маршрут в список",
+                           "Редактировать маршрут",
                            "Удалить маршрут из списка",
                            "Узнать информацию по номеру маршрута",
                            "Сохранить список в файл",
                            "Закрыть программу"};
     cout << '\n';
-    for (size_t i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 7; ++i) {
         cout << i + 1 << ". " << menu[i] << '\n';
     }
     cout << "Введите необходимый вам пункт меню:\n";
 }
 
-void Menu(std::set <TramRoute> &routes) {
+void Menu(std::set<TramRoute> &routes) {
     unsigned menuPoint;
     while (true) {
         PrintMenu();
@@ -63,6 +64,9 @@ void Menu(std::set <TramRoute> &routes) {
                 break;
             case AddRoute:
                 InsertRoute(routes);
+                break;
+            case EditRoute:
+                EditRouteByName(routes);
                 break;
             case DeleteRoute:
                 EraseRoute(routes);
@@ -81,7 +85,7 @@ void Menu(std::set <TramRoute> &routes) {
     }
 }
 
-void ShowRoutesList(const std::set <TramRoute> &routes) {
+void ShowRoutesList(const std::set<TramRoute> &routes) {
     // TODO: оформление таблички(если не впадлу сделать уголки и попытаться убрать отступы)
     cout << ' ';
     for (size_t i = 0; i < 54; ++i) {
@@ -114,8 +118,8 @@ void ShowRoutesList(const std::set <TramRoute> &routes) {
         } else {
             cout << route.RoadTime % 60;
         }
-        cout <<std::setw(6) << '|';
-             cout << '\n';
+        cout << std::setw(6) << '|';
+        cout << '\n';
     }
     cout << ' ';
     for (size_t i = 0; i < 54; ++i) {
@@ -123,7 +127,7 @@ void ShowRoutesList(const std::set <TramRoute> &routes) {
     }
 }
 
-void InsertRoute(std::set <TramRoute> &routes) {
+void InsertRoute(std::set<TramRoute> &routes) {
     TramRoute tempRoute;
     cout << "Введите номер маршрута для добавления:" << std::endl;
     cin >> tempRoute.Number;
@@ -187,8 +191,143 @@ void InsertRoute(std::set <TramRoute> &routes) {
     cout << '\n';
 }
 
-//TODO: подумать над выходом
-void EraseRoute(std::set <TramRoute> &routes) {
+
+void EditRouteByName(std::set<TramRoute> &routes) {
+    string numberToEdit;
+    cout << "Введите номер маршрута для редактирования:" << '\n';
+    cin >> numberToEdit;
+    auto c = std::find_if(routes.begin(), routes.end(),
+                          [numberToEdit](const TramRoute &route) {
+                              return route.Number == numberToEdit;
+                          });
+    while (c == routes.end()) {
+        cout << "Маршрута с таким номером не найдено, повторите ввод:" << '\n';
+        cin >> numberToEdit;
+        c = std::find_if(routes.begin(), routes.end(),
+                         [numberToEdit](const TramRoute &route) {
+                             return route.Number == numberToEdit;
+                         });
+    }
+
+    cout << "Вы собираетесь редактировать следующий маршрут:" << '\n';
+    cout << "Номер маршрута: " << (*c).Number << '\n';
+    cout << "Длина маршрута: " << (*c).Length << " км." << '\n';
+    cout << "Время в пути: ";
+    if ((*c).RoadTime / 60 < 10) {
+        cout << '0' << (*c).RoadTime / 60;
+    } else {
+        cout << (*c).RoadTime / 60;
+    }
+    cout << ':';
+    if ((*c).RoadTime % 60 < 10) {
+        cout << '0' << (*c).RoadTime % 60;
+    } else {
+        cout << (*c).RoadTime % 60;
+    }
+    cout << '\n';
+
+    TramRoute tempRoute;
+    tempRoute.Number = (*c).Number;
+    cout << "Введите новую длину маршрута в километрах, если число не целое, введте дробную часть через точку:" << '\n';
+    bool aux = true;
+    cin.exceptions(std::istream::failbit);
+    do {
+        try {
+            cin >> tempRoute.Length;
+            aux = true;
+        }
+        catch (std::ios_base::failure &fail) {
+            aux = false;
+            cout << "Введённое вами значение не является числом, пожалуйста, повторите ввод:" << '\n';
+            cin.clear();
+            std::string tmp;
+            getline(cin, tmp);
+        }
+    } while (!aux);
+
+    cout << "Введите новое время в пути на маршруте в минутах:" << '\n';
+    aux = true;
+    cin.exceptions(std::istream::failbit);
+    do {
+        try {
+            cin >> tempRoute.RoadTime;
+            if (tempRoute.RoadTime <= 0) {
+                aux = false;
+                cout << "Введённое вами значение не превосходит ноль, пожалуйста, повторите ввод:" << '\n';
+            } else aux = true;
+
+        }
+        catch (std::ios_base::failure &fail) {
+            aux = false;
+            cout
+                    << "Введённое вами значение не является числом, пожалуйста, повторите ввод:"
+                    << '\n';
+            cin.clear();
+            std::string tmp;
+            getline(cin, tmp);
+        }
+    } while (!aux);
+
+    cout << "Следующий маршрут был изменён:" << '\n';
+    cout << "Номер: " << (*c).Number << '\n';
+    cout << "Длина в километрах: ";
+    if ((*c).Length == tempRoute.Length) {
+        cout << (*c).Length;
+    } else {
+        cout << (*c).Length << " -> " << tempRoute.Length;
+        // А чо реплейсить нельзя по-человечески? ??????????????
+    }
+    cout << '\n';
+
+    cout << "Время в пути: ";
+    if ((*c).RoadTime == tempRoute.Length) {
+        if ((*c).RoadTime / 60 < 10) {
+            cout << '0' << (*c).RoadTime / 60;
+        } else {
+            cout << (*c).RoadTime / 60;
+        }
+        cout << ':';
+        if ((*c).RoadTime % 60 < 10) {
+            cout << '0' << (*c).RoadTime % 60;
+        } else {
+            cout << (*c).RoadTime % 60;
+        }
+        cout << '\n';
+    } else {
+        if ((*c).RoadTime / 60 < 10) {
+            cout << '0' << (*c).RoadTime / 60;
+        } else {
+            cout << (*c).RoadTime / 60;
+        }
+        cout << ':';
+        if ((*c).RoadTime % 60 < 10) {
+            cout << '0' << (*c).RoadTime % 60;
+        } else {
+            cout << (*c).RoadTime % 60;
+        }
+        cout << " -> ";
+        if (tempRoute.RoadTime / 60 < 10) {
+            cout << '0' << tempRoute.RoadTime / 60;
+        } else {
+            cout << tempRoute.RoadTime / 60;
+        }
+        cout << ':';
+        if (tempRoute.RoadTime % 60 < 10) {
+            cout << '0' << tempRoute.RoadTime % 60;
+        } else {
+            cout << tempRoute.RoadTime % 60;
+        }
+    }
+    cout << '\n';
+
+    routes.erase(c);
+    routes.insert(tempRoute);
+//TODO: сделать нормальное редактирование
+}
+
+//TODO: подумать над выходом P.S.)забил хер)
+
+void EraseRoute(std::set<TramRoute> &routes) {
     string numberToDelete;
     cout << "Введите номер маршрута для удаления:" << '\n';
     cin >> numberToDelete;
@@ -223,7 +362,7 @@ void EraseRoute(std::set <TramRoute> &routes) {
     routes.erase(c);
 }
 
-void GetRoute(const std::set <TramRoute> &routes) {
+void GetRoute(const std::set<TramRoute> &routes) {
     string numberToFind;
     cout << "Введите номер маршрута по которому хотите получить информацию:" << '\n';
     cin >> numberToFind;
@@ -257,7 +396,7 @@ void GetRoute(const std::set <TramRoute> &routes) {
     cout << '\n';
 }
 
-void SaveRoutes(const std::set <TramRoute> &routes) {
+void SaveRoutes(const std::set<TramRoute> &routes) {
     ofstream ofFile(FILE_NAME);
     ofFile.clear();
     for (const auto &route: routes) {
