@@ -132,7 +132,7 @@ void InsertRoute(std::set<TramRoute> &routes) {
     cout << "Введите номер маршрута для добавления:" << std::endl;
     cin >> tempRoute.Number;
     cout << "Введите длину маршрута в километрах, если число не целое, введте дробную часть через точку:" << '\n';
-    bool aux = true;
+    bool aux;
     cin.exceptions(std::istream::failbit);
     do {
         try {
@@ -149,7 +149,7 @@ void InsertRoute(std::set<TramRoute> &routes) {
     } while (!aux);
 
     cout << "Введите время в пути на маршруте в минутах:" << '\n';
-    aux = true;
+
     cin.exceptions(std::istream::failbit);
     do {
         try {
@@ -229,7 +229,7 @@ void EditRouteByName(std::set<TramRoute> &routes) {
     TramRoute tempRoute;
     tempRoute.Number = (*c).Number;
     cout << "Введите новую длину маршрута в километрах, если число не целое, введте дробную часть через точку:" << '\n';
-    bool aux = true;
+    bool aux;
     cin.exceptions(std::istream::failbit);
     do {
         try {
@@ -246,7 +246,7 @@ void EditRouteByName(std::set<TramRoute> &routes) {
     } while (!aux);
 
     cout << "Введите новое время в пути на маршруте в минутах:" << '\n';
-    aux = true;
+
     cin.exceptions(std::istream::failbit);
     do {
         try {
@@ -403,4 +403,5 @@ void SaveRoutes(const std::set<TramRoute> &routes) {
         ofFile.write((char *) &route, sizeof(TramRoute));
     }
     ofFile.close();
+    cout << "Данные успешно сохранены в файл \""<<FILE_NAME<<'\"' << '\n';
 }

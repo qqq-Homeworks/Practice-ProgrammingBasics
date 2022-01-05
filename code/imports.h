@@ -14,7 +14,7 @@
 #include <set>
 #include <cmath>
 
-using std::cin, std::cout, std::ifstream, std::ofstream, std::string;
+using namespace std;
 
 struct TramRoute{
     string Number;
